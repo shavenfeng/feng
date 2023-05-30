@@ -30,6 +30,10 @@ func (r *RouterGroup) Group(path string, handlers ...HandlerFunc) RouterGroup {
 	}
 }
 
+func (r *RouterGroup) addHandler(handlers ...HandlerFunc) {
+	r.handlers = append(r.handlers, handlers...)
+}
+
 func (r *RouterGroup) getAbsolutePath(relativePath string) string {
 	if r.bathPath == "/" {
 		return relativePath

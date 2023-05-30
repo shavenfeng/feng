@@ -41,6 +41,10 @@ func (engine *Engine) handle(responseWriter http.ResponseWriter, request *http.R
 		params:   make(Params),
 	}
 	treeNode := engine.routerTrees[request.Method].findNode(request.Method, request.URL.Path, ctx.params)
+	if treeNode == nil {
+		NotFindMiddleware(ctx)
+		return
+	}
 	for _, handler := range treeNode.handlers {
 		handler(ctx)
 	}
@@ -56,4 +60,9 @@ func (engine *Engine) addRoute(method, path string, handlers ...HandlerFunc) {
 		engine.routerTrees[method] = root
 	}
 	root.addNode(method, path, handlers...)
+}
+
+func (engine *Engine) Use(middleware ...HandlerFunc) *Engine {
+	engine.RouterGroup.addHandler(middleware...)
+	return engine
 }
