@@ -28,7 +28,7 @@ func (ctx *Context) GetQueryByKey(key string) any {
 	return queryMap[key]
 }
 
-func (ctx Context) setParam(key string, value string) {
+func (ctx *Context) setParam(key string, value string) {
 	if ctx.params == nil {
 		ctx.params = make(map[string]string)
 	}
@@ -39,6 +39,6 @@ func (ctx *Context) Param() map[string]string {
 	return ctx.params
 }
 
-func (ctx Context) GeParamByKey(key string) string {
+func (ctx *Context) GeParamByKey(key string) string {
 	return ctx.params[key]
 }

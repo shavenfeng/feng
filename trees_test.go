@@ -63,7 +63,7 @@ func TestFindNode(t *testing.T) {
 		handlers: nil,
 		children: []*node{
 			&node{
-				pattern:  "use",
+				pattern:  "user",
 				handlers: nil,
 				children: []*node{
 					&node{
