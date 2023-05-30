@@ -81,7 +81,7 @@ func TestFindNode(t *testing.T) {
 			},
 		},
 	}
-	findNode := rootNode.findNode(http.MethodGet, "/user/member")
+	findNode := rootNode.findNode(http.MethodGet, "/user/member", nil)
 	if findNode == nil || findNode.pattern != "member" {
 		t.Fatal("TestFindNode failed")
 	}

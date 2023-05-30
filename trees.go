@@ -41,18 +41,29 @@ func (n *node) addNode(method, path string, handlers ...HandlerFunc) {
 	}
 }
 
-func (n *node) findNode(method string, path string) *node {
+func (n *node) findNode(method string, path string, params Params) *node {
 	patterns := strings.Split(path, "/")
-	if patterns[0] == "" {
+	firstPattern := patterns[0]
+	if firstPattern == "" {
 		patterns[0] = "/"
 	}
-	if n.pattern == patterns[0] && len(patterns) == 1 {
+	if len(patterns) == 1 && n.pattern == firstPattern {
+		return n
+	}
+	if (n.pattern == firstPattern || strings.HasPrefix(n.pattern, ":")) && len(patterns) == 1 {
 		return n
 	}
 	children := n.children
 	for _, keyNode := range children {
+		newPath := strings.Join(patterns[1:], "/")
 		if patterns[1] == keyNode.pattern {
-			return keyNode.findNode(method, strings.Join(patterns[1:], "/"))
+			return keyNode.findNode(method, newPath, params)
+		}
+		if keyNode != nil && strings.HasPrefix(keyNode.pattern, ":") {
+			if params != nil {
+				params[keyNode.pattern[1:]] = patterns[1]
+			}
+			return keyNode.findNode(method, newPath, params)
 		}
 	}
 	return nil

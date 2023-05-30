@@ -29,7 +29,7 @@ func TestServer(t *testing.T) {
 		server.addRoute(http.MethodPost, "/goods/add", func(ctx *Context) {
 			fmt.Println("test add router")
 		})
-		findNode := server.routerTrees[http.MethodPost].findNode(http.MethodPost, "/goods/add")
+		findNode := server.routerTrees[http.MethodPost].findNode(http.MethodPost, "/goods/add", nil)
 		if findNode.pattern != "add" {
 			t.Fatal("add router failed")
 		}
@@ -46,13 +46,17 @@ func TestServer(t *testing.T) {
 			time.Sleep(1 * time.Second)
 			res, err := http.Get("http://localhost:8000/user/list")
 			if err != nil {
-				t.Fatalf("service error: %s", err)
+				t.Errorf("service error: %s", err)
+				return
 			}
-			defer res.Body.Close()
+			defer func() {
+				res.Body.Close()
+				l.Close()
+			}()
 			body, _ := io.ReadAll(res.Body)
-			l.Close()
 			if string(body) != responseData {
-				t.Fatal("failed to test router handler")
+				t.Error("failed to test router handler")
+				return
 			}
 		}(listen)
 		http.Serve(listen, server)

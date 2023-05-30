@@ -35,12 +35,14 @@ func (engine *Engine) ServeHTTP(responseWriter http.ResponseWriter, request *htt
 }
 
 func (engine *Engine) handle(responseWriter http.ResponseWriter, request *http.Request) {
-	treeNode := engine.routerTrees[request.Method].findNode(request.Method, request.URL.Path)
+	ctx := &Context{
+		request:  request,
+		response: responseWriter,
+		params:   make(Params),
+	}
+	treeNode := engine.routerTrees[request.Method].findNode(request.Method, request.URL.Path, ctx.params)
 	for _, handler := range treeNode.handlers {
-		handler(&Context{
-			request:  *request,
-			response: responseWriter,
-		})
+		handler(ctx)
 	}
 }
 
