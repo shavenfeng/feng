@@ -85,6 +85,10 @@ func TestUseMiddleware(t *testing.T) {
 
 	engine.GET("/user", func(ctx *Context) {
 		fmt.Println("this is user handler")
+		ctx.Json(http.StatusOK, map[string]any{
+			"name": "feng",
+			"age":  18,
+		})
 	})
 
 	listen, err := net.Listen("tcp", "localhost:5000")
@@ -106,6 +110,8 @@ func TestUseMiddleware(t *testing.T) {
 		if !logMiddlewareCalled || !printHostMiddlewareCalled || !printUrlMiddlewareCalled {
 			t.Error("middlewares were not be called")
 		}
+		data, _ := io.ReadAll(resp.Body)
+		fmt.Println(string(data))
 	}(listen)
 
 	http.Serve(listen, engine)

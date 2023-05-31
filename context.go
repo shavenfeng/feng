@@ -1,6 +1,7 @@
 package feng
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 )
@@ -41,4 +42,19 @@ func (ctx *Context) Param() map[string]string {
 
 func (ctx *Context) GeParamByKey(key string) string {
 	return ctx.params[key]
+}
+
+func (ctx *Context) Status(code int) {
+	ctx.response.WriteHeader(code)
+}
+
+func (ctx *Context) Json(code int, obj any) error {
+	ctx.response.Header().Set("Content-Type", "application/json")
+	ctx.Status(code)
+	bytes, err := json.Marshal(obj)
+	if err != nil {
+		return err
+	}
+	_, err = ctx.response.Write(bytes)
+	return err
 }
