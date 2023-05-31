@@ -75,7 +75,9 @@ func TestRouterQueryAndParams(t *testing.T) {
 			time.Sleep(100 * time.Millisecond)
 			resp, err := http.Get("http://localhost:8000/user?id=1&type=2&work=boss")
 			defer func() {
-				resp.Body.Close()
+				if resp != nil {
+					resp.Body.Close()
+				}
 				wg.Done()
 			}()
 			if err != nil {
@@ -104,7 +106,9 @@ func TestRouterQueryAndParams(t *testing.T) {
 			time.Sleep(100 * time.Millisecond)
 			resp, err := http.Get("http://localhost:8000/user/111/feng")
 			defer func() {
-				resp.Body.Close()
+				if resp != nil {
+					resp.Body.Close()
+				}
 				wg.Done()
 			}()
 			if err != nil {

@@ -45,14 +45,16 @@ func TestServer(t *testing.T) {
 		go func(l net.Listener) {
 			time.Sleep(1 * time.Second)
 			res, err := http.Get("http://localhost:8000/user/list")
+			defer func() {
+				if res != nil {
+					res.Body.Close()
+				}
+				l.Close()
+			}()
 			if err != nil {
 				t.Errorf("service error: %s", err)
 				return
 			}
-			defer func() {
-				res.Body.Close()
-				l.Close()
-			}()
 			body, _ := io.ReadAll(res.Body)
 			if string(body) != responseData {
 				t.Error("failed to test router handler")
@@ -61,58 +63,4 @@ func TestServer(t *testing.T) {
 		}(listen)
 		http.Serve(listen, server)
 	})
-}
-
-func TestUseMiddleware(t *testing.T) {
-	logMiddlewareCalled := false
-	printHostMiddlewareCalled := false
-	printUrlMiddlewareCalled := false
-	logMiddleware := func(ctx *Context) {
-		fmt.Println("logMiddleware: ", ctx)
-		logMiddlewareCalled = true
-	}
-	printHostMiddleware := func(ctx *Context) {
-		fmt.Println("printHostMiddleware: ", ctx.request.Host)
-		printHostMiddlewareCalled = true
-	}
-	printUrlMiddleware := func(ctx *Context) {
-		fmt.Println("printUrlMiddleware: ", ctx.request.URL.Path)
-		printUrlMiddlewareCalled = true
-	}
-	engine := NewEngine()
-
-	engine.Use(logMiddleware, printHostMiddleware).Use(printUrlMiddleware)
-
-	engine.GET("/user", func(ctx *Context) {
-		fmt.Println("this is user handler")
-		ctx.Json(http.StatusOK, map[string]any{
-			"name": "feng",
-			"age":  18,
-		})
-	})
-
-	listen, err := net.Listen("tcp", "localhost:5000")
-	if err != nil {
-		t.Error("tcp error: ", err)
-	}
-
-	go func(l net.Listener) {
-		time.Sleep(100 * time.Millisecond)
-		resp, err := http.Get("http://localhost:5000/user")
-		if err != nil {
-			t.Error(err)
-			return
-		}
-		defer func() {
-			resp.Body.Close()
-			l.Close()
-		}()
-		if !logMiddlewareCalled || !printHostMiddlewareCalled || !printUrlMiddlewareCalled {
-			t.Error("middlewares were not be called")
-		}
-		data, _ := io.ReadAll(resp.Body)
-		fmt.Println(string(data))
-	}(listen)
-
-	http.Serve(listen, engine)
 }

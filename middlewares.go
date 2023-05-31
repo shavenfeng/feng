@@ -1,5 +1,8 @@
 package feng
 
-func NotFindMiddleware(ctx *Context) {
+import "net/http"
 
+func NotFindMiddleware(ctx *Context) {
+	ctx.response.WriteHeader(http.StatusNotFound)
+	ctx.response.Write([]byte("Not Found!"))
 }
